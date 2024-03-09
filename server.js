@@ -27,8 +27,7 @@ app.locals.io = io;
 let onlineUsers = [];
 
 io.on("connection", (socket) => {
-    // console.log("new connnection", socket.id);
-    //listen to a connection
+    console.log("a user connected", socket.id);
     socket.on("addNewUser", (userId) => {
         // io.emit("receiveMessage", message);
         !onlineUsers.some((user) => user.userId === userId) &&
@@ -42,14 +41,12 @@ io.on("connection", (socket) => {
 
     });
 
-
-
     //add message
     socket.on("sendMessage", (message) => {
         const user = onlineUsers.find(
             (user) => user.userId === message.recipientId
         );
-
+        console.log("user: ", message)
         if (user) {
             io.to(user.socketId).emit("getMessage", message);
             io.to(user.socketId).emit("getNotification", {
@@ -61,20 +58,16 @@ io.on("connection", (socket) => {
     });
 
     socket.on("disconnect", () => {
-        // console.log("user disconnected:", socket.id);
+        console.log("user disconnected:", socket.id);
+        // Remove the disconnected user from the onlineUsers array
         onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
-
+        console.log("onlineUsers: ", onlineUsers);
+        // Notify all connected clients about the updated list of online users
         io.emit("getOnlineUsers", onlineUsers);
     });
 });
 
 module.exports = io;
-
-
-
-
-
-
 
 
 
@@ -86,7 +79,7 @@ app.use("/api/chats", chatRouter);
 app.use("/api/messages", messageRouter);
 
 app.get("/", (req, res) => {
-    res.send("Welcome to Chat app API");
+    res.send("Welcome to Chat app API 55");
 });
 
 const port = process.env.PORT || 5002;
